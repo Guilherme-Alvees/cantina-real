@@ -1,16 +1,14 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
+import express from "express";
+import cors from "cors";
+import userRoutes from "./routes/routes.js"; // Importação correta no ES Module
+
 const app = express();
-const pool = require("./config/db");
-const userRoutes = require("./routes/users");
 
-app.use(cors());
 app.use(express.json());
-
-app.use("/users", userRoutes);
+app.use(cors());
+app.use("/", userRoutes);
 
 const PORT = process.env.PORT || 3333;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  console.log(`🟢 Servidor rodando na porta ${PORT}`);
 });
