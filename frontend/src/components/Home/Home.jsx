@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../../axios";
+
 import {
   Box,
   TextField,
@@ -8,12 +11,28 @@ import {
   InputLabel,
   FilledInput,
   InputAdornment,
+  Alert,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
 
 function Home() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [openBackdrop, setOpenBackdrop] = React.useState(false);
+
+  const closeBackdrop = () => {
+    setOpenBackdrop(false);
+  };
+
+  const handleClick = () => {
+    navigate("/cadastro-route");
+  };
 
   const handleClickShowPassword = () => {
     setShowPassword((prev) => !prev);
@@ -21,6 +40,34 @@ function Home() {
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
+  };
+
+  const handleLogin = async () => {
+    setErrorMessage(""); // Reseta mensagens de erro antes do login
+    setOpenBackdrop(true);
+    setTimeout(() => {
+      setOpenBackdrop(false);
+    }, 2000);
+    if (!email || !senha) {
+      setErrorMessage("Por favor, preencha todos os campos!");
+      return;
+    }
+
+    try {
+      const response = await loginUser({ email, senha }); // Chama a API de login
+      console.log("Login bem-sucedido:", response.data);
+
+      navigate("/pedidos-route"); // Redireciona para pedidos em caso de sucesso
+    } catch (error) {
+      console.error("Erro ao fazer login:", error);
+
+      // Exibir mensagem de erro amigável
+      if (error.response) {
+        setErrorMessage(error.response.data.error || "Erro ao fazer login!");
+      } else {
+        setErrorMessage("Erro de conexão com o servidor!");
+      }
+    }
   };
 
   return (
@@ -37,21 +84,31 @@ function Home() {
       {/* Logo */}
       <img src="/logo-cantina-real.png" alt="Logo Cantina Real" width={200} />
 
-      {/* Campos de entrada */}
+      {/* Exibir erro, se houver */}
+      {errorMessage && (
+        <Alert severity="error" sx={{ mt: 2, width: "100%" }}>
+          {errorMessage}
+        </Alert>
+      )}
+
+      {/* Campo de Email */}
       <TextField
         label="Email"
         variant="filled"
         fullWidth
-        sx={{
-          borderRadius: 1,
-          mt: 2,
-        }}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        sx={{ borderRadius: 1, mt: 2 }}
       />
+
+      {/* Campo de Senha */}
       <FormControl fullWidth variant="filled" sx={{ mt: 2 }}>
         <InputLabel htmlFor="filled-adornment-password">Senha</InputLabel>
         <FilledInput
           id="filled-adornment-password"
           type={showPassword ? "text" : "password"}
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
           endAdornment={
             <InputAdornment position="end">
               <IconButton
@@ -68,6 +125,7 @@ function Home() {
 
       {/* Botão Entrar */}
       <Button
+        onClick={handleLogin}
         fullWidth
         variant="contained"
         sx={{
@@ -81,9 +139,17 @@ function Home() {
       >
         ENTRAR
       </Button>
+      <Backdrop
+        sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+        open={openBackdrop}
+        onClick={closeBackdrop}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
 
       {/* Botão CADASTRAR */}
       <Button
+        onClick={handleClick}
         fullWidth
         variant="contained"
         sx={{

@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { registerUser } from "../../axios"; // Importe a função de requisição
+import { Link, useNavigate } from "react-router-dom";
+
 import {
   Box,
   TextField,
@@ -16,29 +19,62 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
 
 function Cadastro() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+    img_user: "",
+    senha: "",
+  });
   const [profileImage, setProfileImage] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [open, setOpen] = React.useState(false);
+  const [openLoad, setOpenLoad] = useState(false);
+  const [openSnackBar, setOpenSnackBar] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleClick = () => {
-    setOpen(true);
+  // Atualiza os campos do formulário conforme o usuário digita
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
+  // Envia os dados para o backend ao clicar no botão "Cadastrar"
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setOpenLoad(true);
+    setErrorMessage("");
+
+    try {
+      await registerUser(formData);
+      setOpenSnackBar(true);
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+    } catch (error) {
+      setErrorMessage(
+        "Erro ao cadastrar. Verifique os dados e tente novamente."
+      );
+      setOpenLoad(false);
     }
-
-    setOpen(false);
   };
 
+  // Fecha o Snackbar de sucesso
+  const handleClose = () => {
+    setOpenSnackBar(false);
+    setOpenLoad(false);
+  };
+
+  // Atualiza a imagem do perfil quando o usuário seleciona uma foto
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setProfileImage(imageUrl);
+      setFormData({ ...formData, img_user: imageUrl });
     }
   };
 
@@ -61,14 +97,15 @@ function Cadastro() {
         alignItems: "center",
         justifyContent: "center",
         height: "100vh",
-        padding: 3,
-        overflow: "hidden",
+        padding: 1,
       }}
     >
       {/* Botão de voltar */}
       <Box sx={{ alignSelf: "flex-start" }}>
         <IconButton>
-          <ArrowBackIcon fontSize="large" />
+          <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
+            <ArrowBackIcon fontSize="large" />
+          </Link>
         </IconButton>
       </Box>
 
@@ -83,8 +120,8 @@ function Cadastro() {
         />
         <Avatar
           sx={{
-            width: 150,
-            height: 150,
+            width: 140,
+            height: 140,
             cursor: "pointer",
             marginBottom: 2,
             backgroundColor: "#ffff",
@@ -97,54 +134,104 @@ function Cadastro() {
         </Avatar>
       </label>
 
-      {/* Campos de entrada */}
-      <TextField label="Nome *" variant="filled" fullWidth sx={inputStyle} />
-      <TextField label="Email *" variant="filled" fullWidth sx={inputStyle} />
-      <TextField
-        label="Telefone *"
-        variant="filled"
-        fullWidth
-        sx={inputStyle}
-      />
-
-      {/* Campo de senha */}
-      <FormControl fullWidth variant="filled" sx={inputStyle}>
-        <InputLabel htmlFor="filled-adornment-password">Senha *</InputLabel>
-        <FilledInput
-          id="filled-adornment-password"
-          type={showPassword ? "text" : "password"}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                onClick={handleClickShowPassword}
-                onMouseDown={handleMouseDownPassword}
-                edge="end"
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          }
+      {/* Formulário */}
+      <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+        <TextField
+          label="Nome"
+          name="nome"
+          variant="filled"
+          fullWidth
+          sx={inputStyle}
+          onChange={handleChange}
+          required
         />
-      </FormControl>
+        <TextField
+          label="Email"
+          name="email"
+          type="email"
+          variant="filled"
+          fullWidth
+          sx={inputStyle}
+          onChange={handleChange}
+          required
+        />
+        <TextField
+          label="Telefone"
+          name="telefone"
+          variant="filled"
+          fullWidth
+          sx={inputStyle}
+          onChange={handleChange}
+          required
+        />
 
-      {/* Botão Cadastrar */}
-      <Button
-        onClick={handleClick}
-        fullWidth
-        variant="contained"
-        sx={{
-          backgroundColor: "#00bf63",
-          mt: 2,
-          borderRadius: 3,
-          fontWeight: "bold",
-          padding: "0.5rem",
-          marginTop: "3rem",
-        }}
-        endIcon={<ArrowForwardIcon />}
+        {/* Campo de senha */}
+        <FormControl fullWidth variant="filled" sx={inputStyle}>
+          <InputLabel htmlFor="filled-adornment-password">Senha *</InputLabel>
+          <FilledInput
+            id="filled-adornment-password"
+            name="senha"
+            type={showPassword ? "text" : "password"}
+            onChange={handleChange}
+            required
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+          />
+        </FormControl>
+
+        {/* Botão Cadastrar */}
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          sx={{
+            backgroundColor: "#00bf63",
+            mt: 2,
+            borderRadius: 3,
+            fontWeight: "bold",
+            padding: "0.5rem",
+            marginTop: "2rem",
+          }}
+          endIcon={<ArrowForwardIcon />}
+        >
+          CADASTRAR
+        </Button>
+      </form>
+
+      {/* Mensagem de erro */}
+      {errorMessage && (
+        <Alert
+          severity="error"
+          sx={{ width: "100%", mt: 2 }}
+          autoHideDuration={5000}
+        >
+          Usuário já cadastrado.
+        </Alert>
+      )}
+
+      <Backdrop
+        sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+        autoHideDuration={5000}
+        open={openLoad}
+        onClick={handleClose}
       >
-        CADASTRAR
-      </Button>
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
+      <Snackbar
+        open={openSnackBar}
+        autoHideDuration={5000}
+        onClose={handleClose}
+      >
         <Alert
           onClose={handleClose}
           severity="success"
