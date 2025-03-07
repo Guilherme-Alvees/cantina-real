@@ -22,6 +22,8 @@ export default axiosInstance;
 export const registerUser = (userData) =>
   axiosInstance.post("/users", userData);
 
-// Função de login
 export const loginUser = (credentials) =>
   axiosInstance.post("/login", credentials);
+
+export const updateUser = (id, userData) =>
+  axiosInstance.put(`/users/${id}`, userData);

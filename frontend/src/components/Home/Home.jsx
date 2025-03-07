@@ -45,22 +45,26 @@ function Home() {
   const handleLogin = async () => {
     setErrorMessage(""); // Reseta mensagens de erro antes do login
     setOpenBackdrop(true);
-    setTimeout(() => {
-      setOpenBackdrop(false);
-    }, 2000);
+  
     if (!email || !senha) {
+      setOpenBackdrop(false);
       setErrorMessage("Por favor, preencha todos os campos!");
       return;
     }
-
+  
     try {
       const response = await loginUser({ email, senha }); // Chama a API de login
       console.log("Login bem-sucedido:", response.data);
-
-      navigate("/pedidos-route"); // Redireciona para pedidos em caso de sucesso
+  
+      // Armazena os dados do usuário no localStorage
+      localStorage.setItem("user", JSON.stringify(response.data));
+  
+      // Redireciona para a página de pedidos
+      navigate("/pedidos-route"); 
     } catch (error) {
       console.error("Erro ao fazer login:", error);
-
+      setOpenBackdrop(false); // Fecha o carregamento
+  
       // Exibir mensagem de erro amigável
       if (error.response) {
         setErrorMessage(error.response.data.error || "Erro ao fazer login!");
@@ -68,21 +72,27 @@ function Home() {
         setErrorMessage("Erro de conexão com o servidor!");
       }
     }
-  };
+  };  
 
   return (
     <Box
       sx={{
-        display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         height: "100vh",
-        padding: 3,
+        position: "fixed",
+        padding: 3
       }}
     >
       {/* Logo */}
+      <Box sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}>
       <img src="/logo-cantina-real.png" alt="Logo Cantina Real" width={200} />
+      </Box>
 
       {/* Exibir erro, se houver */}
       {errorMessage && (

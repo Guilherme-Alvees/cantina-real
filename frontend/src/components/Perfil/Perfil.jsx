@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import PedidoTable from "./PedidosTable";
 import Box from "@mui/material/Box";
 import Navbar from "../Navbar/Navbar";
@@ -70,6 +71,10 @@ const Perfil = () => {
     navigate("/pedidos-route");
   };
 
+  const goToEditarPerfil = () => {
+    navigate("/editar-perfil-route");
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Navbar />
@@ -103,7 +108,7 @@ const Perfil = () => {
           allowScrollButtonsMobile
           aria-label="Navegação de Perfil"
         >
-          <Tab icon={<ManageAccountsIcon />} label="Editar Perfil" />
+          <Tab onClick={goToEditarPerfil} icon={<ManageAccountsIcon />} label="Editar Perfil" />
           <Tab icon={<ReceiptLongIcon />} label="Gerar Extrato" />
           <Tab icon={<InventoryIcon />} label="Estoque" />
           <Tab icon={<EqualizerIcon />} label="Dashboard" />

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { registerUser } from "../../axios"; // Importe a função de requisição
+import React, { useState, useEffect } from "react";
+import { updateUser } from "../../axios"; 
 import { Link, useNavigate } from "react-router-dom";
+
 import {
   Box,
   TextField,
@@ -20,13 +21,18 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
-function Cadastro() {
+function EditarPerfil() {
   const navigate = useNavigate();
+  
+  // Carrega os dados do usuário logado do localStorage
+  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+
   const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    telefone: "",
-    senha: "",
+    id: storedUser.id || "",
+    nome: storedUser.nome || "",
+    email: storedUser.email || "",
+    telefone: storedUser.telefone || "",
+    senha: "", // Não trazemos a senha por segurança
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -48,20 +54,24 @@ function Cadastro() {
     event.preventDefault();
   };
 
-  // Envia os dados para o backend ao clicar no botão "Cadastrar"
+  // Envia os dados para o backend ao clicar no botão "Atualizar"
   const handleSubmit = async (e) => {
     e.preventDefault();
     setOpenLoad(true);
     setErrorMessage("");
 
     try {
-      await registerUser(formData);
+      await updateUser(formData.id, formData);
       setOpenSnackBar(true);
+
+      // Atualiza os dados no localStorage
+      localStorage.setItem("user", JSON.stringify({ ...storedUser, ...formData }));
+
       setTimeout(() => {
-        navigate("/");
+        navigate("/perfil-route");
       }, 2000);
     } catch (error) {
-      setErrorMessage("Erro ao cadastrar. Verifique os dados e tente novamente.");
+      setErrorMessage("Erro ao editar. Verifique os dados e tente novamente.");
       setOpenLoad(false);
     }
   };
@@ -87,7 +97,7 @@ function Cadastro() {
       {/* Botão de voltar */}
       <Box sx={{ alignSelf: "flex-start", mt: -5, mb: 8 }}>
         <IconButton>
-          <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
+          <Link to="/perfil-route" style={{ color: "inherit", textDecoration: "none" }}>
             <ArrowBackIcon fontSize="large" />
           </Link>
         </IconButton>
@@ -101,6 +111,7 @@ function Cadastro() {
           fullWidth
           sx={inputStyle}
           onChange={handleChange}
+          value={formData.nome}
           required
         />
         <TextField
@@ -111,6 +122,7 @@ function Cadastro() {
           fullWidth
           sx={inputStyle}
           onChange={handleChange}
+          value={formData.email}
           required
         />
         <TextField
@@ -120,18 +132,19 @@ function Cadastro() {
           fullWidth
           sx={inputStyle}
           onChange={handleChange}
+          value={formData.telefone}
           required
         />
 
         {/* Campo de senha */}
         <FormControl fullWidth variant="filled" sx={inputStyle}>
-          <InputLabel htmlFor="filled-adornment-password">Senha *</InputLabel>
+          <InputLabel htmlFor="filled-adornment-password">Nova Senha</InputLabel>
           <FilledInput
             id="filled-adornment-password"
             name="senha"
             type={showPassword ? "text" : "password"}
             onChange={handleChange}
-            required
+            value={formData.senha}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
@@ -146,7 +159,7 @@ function Cadastro() {
           />
         </FormControl>
 
-        {/* Botão Cadastrar */}
+        {/* Botão Atualizar */}
         <Button
           type="submit"
           fullWidth
@@ -160,7 +173,7 @@ function Cadastro() {
           }}
           endIcon={<ArrowForwardIcon />}
         >
-          CADASTRAR
+          ATUALIZAR
         </Button>
       </form>
 
@@ -177,7 +190,7 @@ function Cadastro() {
 
       <Snackbar open={openSnackBar} autoHideDuration={5000} onClose={handleClose}>
         <Alert onClose={handleClose} severity="success" variant="filled" sx={{ width: "100%" }}>
-          Usuário cadastrado com sucesso!
+          Usuário atualizado com sucesso!
         </Alert>
       </Snackbar>
     </Box>
@@ -190,4 +203,4 @@ const inputStyle = {
   mt: 2,
 };
 
-export default Cadastro;
+export default EditarPerfil;
