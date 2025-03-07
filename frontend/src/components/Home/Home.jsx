@@ -43,36 +43,38 @@ function Home() {
   };
 
   const handleLogin = async () => {
-    setErrorMessage(""); // Reseta mensagens de erro antes do login
+    setErrorMessage(""); 
     setOpenBackdrop(true);
   
-    if (!email || !senha) {
+    setTimeout(() => {
       setOpenBackdrop(false);
+    }, 2000);
+  
+    if (!email || !senha) {
       setErrorMessage("Por favor, preencha todos os campos!");
       return;
     }
   
     try {
-      const response = await loginUser({ email, senha }); // Chama a API de login
+      const response = await loginUser({ email, senha }); 
       console.log("Login bem-sucedido:", response.data);
   
-      // Armazena os dados do usuário no localStorage
-      localStorage.setItem("user", JSON.stringify(response.data));
+      // Verifica se os dados do usuário existem antes de salvar
+      if (response.data && response.data.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      }
   
-      // Redireciona para a página de pedidos
       navigate("/pedidos-route"); 
     } catch (error) {
       console.error("Erro ao fazer login:", error);
-      setOpenBackdrop(false); // Fecha o carregamento
   
-      // Exibir mensagem de erro amigável
       if (error.response) {
         setErrorMessage(error.response.data.error || "Erro ao fazer login!");
       } else {
         setErrorMessage("Erro de conexão com o servidor!");
       }
     }
-  };  
+  };    
 
   return (
     <Box

@@ -13,9 +13,10 @@ import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-  const hello = "Olá, ";
   const navigate = useNavigate();
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -30,6 +31,7 @@ const Navbar = () => {
   };
 
   const logoutClick = () => {
+    localStorage.removeItem("user");
     navigate("/");
   };
 
@@ -73,7 +75,7 @@ const Navbar = () => {
               </MenuItem>
           </Menu>
         </Box>
-        <Typography variant="h6">{hello} Username</Typography>
+        <Typography variant="h6">Olá, {user ? user.nome : "Visitante"}!</Typography>
       </Toolbar>
     </AppBar>
   );
