@@ -27,3 +27,6 @@ export const loginUser = (credentials) =>
 
 export const updateUser = (id, userData) =>
   axiosInstance.put(`/users/${id}`, userData);
+
+export const lastThreeOrders = (id) => 
+  axiosInstance.get(`/orders/last-three/${id}`);

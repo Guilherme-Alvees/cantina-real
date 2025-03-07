@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import PedidoTable from "./PedidosTable";
+import { lastThreeOrders } from "../../axios";
+
 import Box from "@mui/material/Box";
 import Navbar from "../Navbar/Navbar";
 import Tabs from "@mui/material/Tabs";
@@ -13,48 +14,23 @@ import EqualizerIcon from "@mui/icons-material/Equalizer";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import IconButton from "@mui/material/IconButton";
-
-const pedidos = [
-  {
-    "dataPedido": "29/01/2025",
-    "pedidos": [
-      { "nome": "Água", "descricao": "Garrafa-350 ml", "quantidade": 3, "valor": 15.0 },
-      { "nome": "Espetinho", "descricao": "Carne", "quantidade": 1, "valor": 8.0 },
-      { "nome": "Coca Cola", "descricao": "Latinha-350 ml", "quantidade": 3, "valor": 15.0 }
-    ]
-  },
-  {
-    "dataPedido": "31/01/2025",
-    "pedidos": [
-      { "nome": "Água", "descricao": "Garrafa-350 ml", "quantidade": 3, "valor": 15.0 }
-    ]
-  },
-  {
-    "dataPedido": "02/02/2025",
-    "pedidos": [
-      { "nome": "Água", "descricao": "Garrafa-350 ml", "quantidade": 2, "valor": 15.0 }
-    ]
-  },
-  {
-    "dataPedido": "09/02/2025",
-    "pedidos": [
-      { "nome": "Água", "descricao": "Garrafa-350 ml", "quantidade": 2, "valor": 15.0 }
-    ]
-  }
-];
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Perfil = () => {
-  const [pedidoData, setPedidoData] = useState(pedidos[0]); // Definir um estado inicial válido
-  const [value, setValue] = React.useState(0);
+  const [pedidoData, setPedidoData] = useState([]);
+  const [value, setValue] = React.useState(() => {
+    return parseInt(localStorage.getItem("perfilTabIndex")) || 0;
+  });
+
   const navigate = useNavigate();
+  const userIdJson = localStorage.getItem("user");
+  const userId = userIdJson ? JSON.parse(userIdJson).id : null;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("https://minhaapi.com/pedidos/123"); // Exemplo de endpoint
-        if (!response.ok) throw new Error("Erro ao buscar os pedidos");
-        const data = await response.json();
-        setPedidoData(data);
+        const response = await lastThreeOrders(userId);
+        setPedidoData(response.data);
       } catch (error) {
         console.error("Erro ao carregar os pedidos:", error);
       }
@@ -65,6 +41,7 @@ const Perfil = () => {
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    localStorage.setItem("perfilTabIndex", newValue);
   };
 
   const goToPedidos = () => {
@@ -82,14 +59,21 @@ const Perfil = () => {
         <IconButton onClick={goToPedidos} color="inherit">
           <ArrowBackIcon />
         </IconButton>
-        {pedidoData ? (
-          <PedidoTable dataPedido={pedidoData.dataPedido} pedidos={pedidoData.pedidos} />
+        {pedidoData.length > 0 ? (
+          pedidoData.map((pedido, index) => (
+            <PedidoTable key={index} dataPedido={pedido.dataPedido} pedidos={pedido.pedidos} />
+          ))
         ) : (
-          <p>Carregando...</p>
+          <Box sx={{ 
+            justifyContent: "center", 
+            display: "flex",
+            mt: "50%"
+             }}>
+            <CircularProgress />
+          </Box>
         )}
       </Box>
 
-      {/* Barra de navegação fixa no final da tela */}
       <Box
         sx={{
           position: "fixed",
