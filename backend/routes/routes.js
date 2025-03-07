@@ -1,6 +1,7 @@
 import express from "express";
 import { getAllUsers, postNewUser, loginUser, updateUser} from "../controllers/users.js";
 import { getAllProducts } from "../controllers/products.js";
+import { getLastThreeOrders } from "../controllers/orders.js";
 
 const router = express.Router();
 
@@ -12,5 +13,8 @@ router.put("/:id", updateUser);
 
 //products.js
 router.get("/products", getAllProducts);
+
+//oredrs.js
+router.get("/orders/last-three/:id_user", getLastThreeOrders);
 
 export default router;
