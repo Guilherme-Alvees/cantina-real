@@ -10,7 +10,7 @@ export const getAllUsers = async (_, res) => {
 };
 
 export const postNewUser = async (req, res) => {
-  const { nome, email, telefone, img_user, senha } = req.body;
+  const { nome, email, telefone, senha } = req.body;
 
   if (!nome || !email || !telefone || !senha) {
     return res.status(400).json({ error: "Todos os campos são obrigatórios!" });
@@ -18,10 +18,10 @@ export const postNewUser = async (req, res) => {
 
   try {
     const query = `
-      INSERT INTO users (nome, email, telefone, img_user, senha)
+      INSERT INTO users (nome, email, telefone, senha)
       VALUES ($1, $2, $3, $4, $5) RETURNING *`;
 
-    const values = [nome, email, telefone, img_user, senha];
+    const values = [nome, email, telefone, senha];
 
     const { rows } = await pool.query(query, values);
     return res
@@ -40,7 +40,6 @@ export const loginUser = async (req, res) => {
   }
 
   try {
-    // Busca o usuário pelo e-mail
     const query = "SELECT * FROM users WHERE email = $1";
     const { rows } = await pool.query(query, [email]);
 
@@ -50,24 +49,47 @@ export const loginUser = async (req, res) => {
 
     const user = rows[0];
 
-    // Compara a senha (sem criptografia, apenas para estudo)
     if (user.senha !== senha) {
       return res.status(401).json({ error: "Senha incorreta!" });
     }
 
-    // Remove a senha da resposta
     delete user.senha;
 
-    // Se img_user for um Buffer, converte para string
-    if (user.img_user && user.img_user.type === "Buffer") {
-      user.img_user = Buffer.from(user.img_user.data).toString();
-    }
-
-    // Retorna os dados sem a senha
     return res
       .status(200)
       .json({ message: "Login realizado com sucesso!", user });
   } catch (err) {
     return res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  const id = parseInt(req.params.id, 10); // Converte para número
+  const { nome, email, telefone, senha } = req.body;
+
+  if (!id || !nome || !email || !telefone || !senha) {
+    return res.status(400).json({ error: "Todos os campos são obrigatórios!" });
+  }
+
+  try {
+    const userExists = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+
+    if (userExists.rows.length === 0) {
+      return res.status(404).json({ error: `Usuário com ID ${id} não encontrado!` });
+    }
+
+    const query = `
+      UPDATE users
+      SET nome = $1, email = $2, telefone = $3, senha = $4
+      WHERE id = $5
+      RETURNING *`;
+    
+    const values = [nome, email, telefone, senha, id];
+    const { rows } = await pool.query(query, values);
+
+    return res.status(200).json({ message: "Usuário atualizado com sucesso!", user: rows[0] });
+  } catch (err) {
+    console.error("Erro ao atualizar usuário:", err);
+    return res.status(500).json({ error: "Erro interno no servidor. Tente novamente mais tarde." });
   }
 };

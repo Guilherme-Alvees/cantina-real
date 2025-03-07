@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import userRoutes from "./routes/routes.js"; // Importação correta no ES Module
+import userRoutes from "./routes/routes.js";
 
 const app = express();
 
