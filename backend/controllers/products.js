@@ -49,3 +49,23 @@ export const createNewProduct = async (req, res) => {
     return res.status(500).json({ error: "Erro interno do servidor." });
   }
 };
+
+export const foodsAndDrinks = async (_, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT nome, descricao, valor, categoria, quantidade
+      FROM products
+      WHERE categoria IN ('comida', 'bebidas')
+    `);
+
+    const products = {
+      comidas: rows.filter((item) => item.categoria === "comida"),
+      bebidas: rows.filter((item) => item.categoria === "bebidas"),
+    };
+
+    return res.status(200).json(products);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
