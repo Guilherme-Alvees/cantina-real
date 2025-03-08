@@ -34,3 +34,6 @@ export const lastThreeOrders = (id) =>
 //Products
 export const registerNewProduct = (userData) =>
   axiosInstance.post("/products", userData);
+
+export const getAllProducts = () => 
+  axiosInstance.get("/products");
