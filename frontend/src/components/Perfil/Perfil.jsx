@@ -61,10 +61,14 @@ const Perfil = () => {
     navigate("/editar-perfil-route");
   };
 
+  const goToEstoque = () => {
+    navigate("/estoque-route");
+  };
+
   return (
     <Box sx={{ minHeight: "100vh", pb: 8 }}> 
       <Navbar />
-      <Box sx={{ mt: 8}}>
+      <Box sx={{ mt: 9}}>
         <IconButton onClick={goToPedidos} color="inherit">
           <ArrowBackIcon /><Typography
         sx={{
@@ -138,7 +142,7 @@ const Perfil = () => {
         >
           <Tab onClick={goToEditarPerfil} icon={<ManageAccountsIcon />} label="Editar Perfil" />
           <Tab icon={<ReceiptLongIcon />} label="Gerar Extrato" />
-          <Tab icon={<InventoryIcon />} label="Estoque" />
+          <Tab onClick={goToEstoque} icon={<InventoryIcon />} label="Estoque" />
           <Tab icon={<EqualizerIcon />} label="Dashboard" />
           <Tab icon={<PeopleAltIcon />} label="Usuários" />
         </Tabs>

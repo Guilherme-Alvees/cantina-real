@@ -30,3 +30,7 @@ export const updateUser = (id, userData) =>
 
 export const lastThreeOrders = (id) => 
   axiosInstance.get(`/orders/last-three/${id}`);
+
+//Products
+export const registerNewProduct = (userData) =>
+  axiosInstance.post("/products", userData);
