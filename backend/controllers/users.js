@@ -19,7 +19,7 @@ export const postNewUser = async (req, res) => {
   try {
     const query = `
       INSERT INTO users (nome, email, telefone, senha)
-      VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+      VALUES ($1, $2, $3, $4) RETURNING *`; // Removido o $5 extra
 
     const values = [nome, email, telefone, senha];
 
