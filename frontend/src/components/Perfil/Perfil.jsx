@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PedidoTable from "./PedidosTable";
+import Historico from "./Historico";
 import { lastThreeOrders } from "../../axios";
 
 import Box from "@mui/material/Box";
@@ -70,13 +70,7 @@ const Perfil = () => {
       <Navbar />
       <Box sx={{ mt: 9}}>
         <IconButton onClick={goToPedidos} color="inherit">
-          <ArrowBackIcon /><Typography
-        sx={{
-          textAlign: "left",
-        }}
-      >
-        Voltar
-      </Typography>
+          <ArrowBackIcon /><Typography sx={{textAlign: "left"}}>Voltar</Typography>
         </IconButton>
 
         {loading && (
@@ -98,7 +92,7 @@ const Perfil = () => {
         Histórico de Pedidos
       </Typography>
       {pedidoData.map((pedido, index) => (
-        <PedidoTable key={index} dataPedido={pedido.dataPedido} pedidos={pedido.pedidos} />
+        <Historico key={index} dataPedido={pedido.dataPedido} pedidos={pedido.pedidos} />
       ))}
     </>
   )}
@@ -113,9 +107,6 @@ const Perfil = () => {
               </Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: "center" }}>
-              <Button variant="contained" color="primary" onClick={() => navigate("/pedidos-route")}>
-                Pedir agora
-              </Button>
             </CardActions>
           </Card>
         )}

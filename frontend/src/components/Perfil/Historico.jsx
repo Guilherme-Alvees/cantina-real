@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import CalendarMonthSharpIcon from "@mui/icons-material/CalendarMonthSharp";
 
-const PedidoTable = ({ dataPedido, pedidos }) => {
+const Historico = ({ dataPedido, pedidos }) => {
   return (
     <TableContainer
       component={Paper}
@@ -19,8 +19,8 @@ const PedidoTable = ({ dataPedido, pedidos }) => {
         maxWidth: 500,
         margin: "auto",
         mt: 1,
-        overflowX: "auto", // Adiciona scroll horizontal
-        whiteSpace: "nowrap", // Evita que o texto quebre
+        overflowX: "auto", 
+        whiteSpace: "nowrap", 
       }}
     >
       <Typography
@@ -59,4 +59,4 @@ const PedidoTable = ({ dataPedido, pedidos }) => {
   );
 };
 
-export default PedidoTable;
+export default Historico;

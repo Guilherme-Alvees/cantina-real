@@ -1,193 +1,107 @@
 import React, { useState } from "react";
-import { registerUser } from "../../axios"; // Importe a função de requisição
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "../../axios";
+
 import {
   Box,
-  TextField,
-  Button,
-  IconButton,
-  FormControl,
-  InputLabel,
-  FilledInput,
-  InputAdornment,
+  Typography,
   Snackbar,
+  IconButton,
   Alert,
   Backdrop,
   CircularProgress,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Visibility from "@mui/icons-material/Visibility";
 
-function Cadastro() {
+const Cadastro = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    telefone: "",
-    senha: "",
-  });
-
   const [showPassword, setShowPassword] = useState(false);
-  const [openLoad, setOpenLoad] = useState(false);
-  const [openSnackBar, setOpenSnackBar] = useState(false);
+  const [userData, setUserData] = useState({ nome: "", email: "", telefone: "", senha: "" });
+  const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  // Atualiza os campos do formulário conforme o usuário digita
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (event) => event.preventDefault();
+  const handleChange = (e) => setUserData({ ...userData, [e.target.name]: e.target.value });
 
-  // Alterna a visibilidade da senha
-  const handleClickShowPassword = () => {
-    setShowPassword((prev) => !prev);
-  };
-
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
-
-  // Envia os dados para o backend ao clicar no botão "Cadastrar"
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setOpenLoad(true);
+    setLoading(true);
+    setTimeout(() => {
+      navigate("/");
+    }, 3000);
     setErrorMessage("");
+    setSuccessMessage("");
 
     try {
-      await registerUser(formData);
-      setOpenSnackBar(true);
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
+      const response = await registerUser(userData);
+      setSuccessMessage(response.data.message);
+      setLoading(false);
     } catch (error) {
-      setErrorMessage("Erro ao cadastrar. Verifique os dados e tente novamente.");
-      setOpenLoad(false);
+      setErrorMessage(error.response?.data?.error || "Erro ao cadastrar usuário.");
+      setLoading(false);
     }
   };
 
-  // Fecha o Snackbar de sucesso
-  const handleClose = () => {
-    setOpenSnackBar(false);
-    setOpenLoad(false);
-  };
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        padding: 3,
-        position: "fixed",
-      }}
-    >
-      {/* Botão de voltar */}
-      <Box sx={{ alignSelf: "flex-start", mt: -5, mb: 8 }}>
-        <IconButton>
-          <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
-            <ArrowBackIcon fontSize="large" />
-          </Link>
+    <Box sx={{ minHeight: "100vh" }}>
+      <Box sx={{ mt: 9, alignItems: "center" }}>
+        <IconButton onClick={() => navigate("/")} color="inherit">
+          <ArrowBackIcon />
+          <Typography sx={{ textAlign: "left" }}>Voltar</Typography>
         </IconButton>
       </Box>
-
-      <form onSubmit={handleSubmit} style={{ width: "100%" }}>
-        <TextField
-          label="Nome"
-          name="nome"
-          variant="filled"
-          fullWidth
-          sx={inputStyle}
-          onChange={handleChange}
-          required
-        />
-        <TextField
-          label="Email"
-          name="email"
-          type="email"
-          variant="filled"
-          fullWidth
-          sx={inputStyle}
-          onChange={handleChange}
-          required
-        />
-        <TextField
-          label="Telefone"
-          name="telefone"
-          variant="filled"
-          fullWidth
-          sx={inputStyle}
-          onChange={handleChange}
-          required
-        />
-
-        {/* Campo de senha */}
-        <FormControl fullWidth variant="filled" sx={inputStyle}>
-          <InputLabel htmlFor="filled-adornment-password">Senha *</InputLabel>
-          <FilledInput
-            id="filled-adornment-password"
+      <Typography sx={{ fontWeight: "bold", textAlign: "center", color: "green" }}>
+        Cadastro de Usuário
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 2, p: 2 }}>
+        <TextField fullWidth label="Nome" name="nome" value={userData.nome} onChange={handleChange} required />
+        <TextField fullWidth label="Email" name="email" type="email" value={userData.email} onChange={handleChange} required />
+        <TextField fullWidth label="Telefone" name="telefone" value={userData.telefone} onChange={handleChange} required />
+        <FormControl fullWidth variant="outlined">
+          <InputLabel htmlFor="outlined-adornment-password">Senha</InputLabel>
+          <OutlinedInput
+            id="outlined-adornment-password"
             name="senha"
             type={showPassword ? "text" : "password"}
+            value={userData.senha}
             onChange={handleChange}
-            required
             endAdornment={
               <InputAdornment position="end">
-                <IconButton
-                  onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                  edge="end"
-                >
+                <IconButton onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
                   {showPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
               </InputAdornment>
             }
+            label="Senha"
           />
         </FormControl>
-
-        {/* Botão Cadastrar */}
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{
-            backgroundColor: "#00bf63",
-            mt: 8,
-            borderRadius: 3,
-            fontWeight: "bold",
-            padding: "0.5rem",
-          }}
-          endIcon={<ArrowForwardIcon />}
-        >
-          CADASTRAR
+        <Button type="submit" fullWidth variant="contained" sx={{ mt: 2, fontWeight: "bold" }}>
+          Cadastrar
         </Button>
-      </form>
+      </Box>
 
-      {/* Mensagem de erro */}
-      {errorMessage && (
-        <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
-          {errorMessage}
-        </Alert>
-      )}
-
-      <Backdrop sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })} open={openLoad}>
+      {errorMessage && <Alert severity="error" sx={{ width: "100%", mt: 2 }}>{errorMessage}</Alert>}
+      <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
         <CircularProgress color="inherit" />
       </Backdrop>
-
-      <Snackbar open={openSnackBar} autoHideDuration={5000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="success" variant="filled" sx={{ width: "100%" }}>
-          Usuário cadastrado com sucesso!
+      <Snackbar open={!!successMessage} onClose={() => setSuccessMessage("")}
+      >
+        <Alert onClose={() => setSuccessMessage("")} severity="success" variant="filled" sx={{ width: "100%" }}>
+          {successMessage}
         </Alert>
       </Snackbar>
     </Box>
   );
-}
-
-// Estilo para os campos de entrada
-const inputStyle = {
-  borderRadius: 1,
-  mt: 2,
 };
 
 export default Cadastro;

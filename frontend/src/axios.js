@@ -37,3 +37,6 @@ export const registerNewProduct = (userData) =>
 
 export const getAllProducts = () => 
   axiosInstance.get("/products");
+
+export const getFoodAndDrinks = () => 
+  axiosInstance.get("/products/foods-and-drinks");

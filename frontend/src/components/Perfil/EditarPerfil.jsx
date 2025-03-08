@@ -1,150 +1,118 @@
-import React, { useState, useEffect } from "react";
-import { updateUser } from "../../axios"; 
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { updateUser } from "../../axios";
+import Navbar from "../Navbar/Navbar";
 
 import {
   Box,
-  TextField,
-  Button,
-  IconButton,
-  FormControl,
-  InputLabel,
-  FilledInput,
-  InputAdornment,
+  Typography,
   Snackbar,
+  IconButton,
   Alert,
   Backdrop,
   CircularProgress,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Visibility from "@mui/icons-material/Visibility";
 
-function EditarPerfil() {
+const EditarPerfil = () => {
   const navigate = useNavigate();
-  
-  // Carrega os dados do usuário logado do localStorage
-  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
-
-  const [formData, setFormData] = useState({
-    id: storedUser.id || "",
-    nome: storedUser.nome || "",
-    email: storedUser.email || "",
-    telefone: storedUser.telefone || "",
-    senha: "", // Não trazemos a senha por segurança
-  });
-
   const [showPassword, setShowPassword] = useState(false);
-  const [openLoad, setOpenLoad] = useState(false);
-  const [openSnackBar, setOpenSnackBar] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
-  // Atualiza os campos do formulário conforme o usuário digita
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // Alterna a visibilidade da senha
-  const handleClickShowPassword = () => {
-    setShowPassword((prev) => !prev);
-  };
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
 
-  // Envia os dados para o backend ao clicar no botão "Atualizar"
+  const [userData, setUserData] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+    senha: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const handleChange = (e) => {
+    setUserData({ ...userData, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setOpenLoad(true);
+    setLoading(true);
     setErrorMessage("");
+    setSuccessMessage("");
 
     try {
-      await updateUser(formData.id, formData);
-      setOpenSnackBar(true);
+      const userId = 1;
+      const response = await updateUser(userId, userData);
 
-      // Atualiza os dados no localStorage
-      localStorage.setItem("user", JSON.stringify({ ...storedUser, ...formData }));
-
-      setTimeout(() => {
-        navigate("/perfil-route");
-      }, 2000);
+      setSuccessMessage(response.data.message);
+      setLoading(false);
     } catch (error) {
-      setErrorMessage("Erro ao editar. Verifique os dados e tente novamente.");
-      setOpenLoad(false);
+      setErrorMessage(
+        error.response?.data?.error || "Erro ao atualizar usuário."
+      );
+      setLoading(false);
     }
   };
 
-  // Fecha o Snackbar de sucesso
-  const handleClose = () => {
-    setOpenSnackBar(false);
-    setOpenLoad(false);
-  };
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        padding: 3,
-        position: "fixed",
-      }}
-    >
-      {/* Botão de voltar */}
-      <Box sx={{ alignSelf: "flex-start", mt: -5, mb: 8 }}>
-        <IconButton>
-          <Link to="/perfil-route" style={{ color: "inherit", textDecoration: "none" }}>
-            <ArrowBackIcon fontSize="large" />
-          </Link>
+    <Box sx={{ minHeight: "100vh",}}>
+      <Navbar />
+      <Box sx={{ mt: 9, alignItems: "center" }}>
+        <IconButton onClick={() => navigate("/perfil-route")} color="inherit">
+          <ArrowBackIcon />
+          <Typography sx={{ textAlign: "left" }}>Voltar</Typography>
         </IconButton>
       </Box>
-
-      <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+      <Typography sx={{ fontWeight: "bold", textAlign: "center", color: "green" }}>
+        Editar Perfil
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 2, p: 2 }}>
         <TextField
+          fullWidth
           label="Nome"
           name="nome"
-          variant="filled"
-          fullWidth
-          sx={inputStyle}
+          value={userData.nome}
           onChange={handleChange}
-          value={formData.nome}
           required
         />
         <TextField
+          fullWidth
           label="Email"
           name="email"
           type="email"
-          variant="filled"
-          fullWidth
-          sx={inputStyle}
+          value={userData.email}
           onChange={handleChange}
-          value={formData.email}
           required
         />
         <TextField
+          fullWidth
           label="Telefone"
           name="telefone"
-          variant="filled"
-          fullWidth
-          sx={inputStyle}
+          value={userData.telefone}
           onChange={handleChange}
-          value={formData.telefone}
           required
         />
-
-        {/* Campo de senha */}
-        <FormControl fullWidth variant="filled" sx={inputStyle}>
-          <InputLabel htmlFor="filled-adornment-password">Nova Senha</InputLabel>
-          <FilledInput
-            id="filled-adornment-password"
+        <FormControl fullWidth variant="outlined">
+          <InputLabel htmlFor="outlined-adornment-password">Senha</InputLabel>
+          <OutlinedInput
+            id="outlined-adornment-password"
             name="senha"
             type={showPassword ? "text" : "password"}
+            value={userData.senha}
             onChange={handleChange}
-            value={formData.senha}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
@@ -156,51 +124,32 @@ function EditarPerfil() {
                 </IconButton>
               </InputAdornment>
             }
+            label="Senha"
           />
         </FormControl>
-
-        {/* Botão Atualizar */}
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{
-            backgroundColor: "#00bf63",
-            mt: 8,
-            borderRadius: 3,
-            fontWeight: "bold",
-            padding: "0.5rem",
-          }}
-          endIcon={<ArrowForwardIcon />}
-        >
-          ATUALIZAR
+        <Button type="submit" fullWidth variant="contained" sx={{ mt: 2, fontWeight: "bold" }}>
+          Salvar Alterações
         </Button>
-      </form>
+      </Box>
 
-      {/* Mensagem de erro */}
       {errorMessage && (
         <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
           {errorMessage}
         </Alert>
       )}
 
-      <Backdrop sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })} open={openLoad}>
+      <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
         <CircularProgress color="inherit" />
       </Backdrop>
 
-      <Snackbar open={openSnackBar} autoHideDuration={5000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="success" variant="filled" sx={{ width: "100%" }}>
-          Usuário atualizado com sucesso!
+      <Snackbar open={!!successMessage} autoHideDuration={5000} onClose={() => setSuccessMessage("")}
+      >
+        <Alert onClose={() => setSuccessMessage("")} severity="success" variant="filled" sx={{ width: "100%" }}>
+          {successMessage}
         </Alert>
       </Snackbar>
     </Box>
   );
-}
-
-// Estilo para os campos de entrada
-const inputStyle = {
-  borderRadius: 1,
-  mt: 2,
 };
 
 export default EditarPerfil;
