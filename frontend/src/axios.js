@@ -19,6 +19,8 @@ axiosInstance.interceptors.response.use(
 export default axiosInstance;
 
 //Users
+export const getAllUsers = () => axiosInstance.get("/users");
+
 export const registerUser = (userData) =>
   axiosInstance.post("/users", userData);
 
@@ -28,15 +30,17 @@ export const loginUser = (credentials) =>
 export const updateUser = (id, userData) =>
   axiosInstance.put(`/users/${id}`, userData);
 
-export const lastThreeOrders = (id) => 
+export const lastThreeOrders = (id) =>
   axiosInstance.get(`/orders/last-three/${id}`);
 
 //Products
 export const registerNewProduct = (userData) =>
   axiosInstance.post("/products", userData);
 
-export const getAllProducts = () => 
-  axiosInstance.get("/products");
+export const getAllProducts = () => axiosInstance.get("/products");
 
-export const getFoodAndDrinks = () => 
+export const getFoodAndDrinks = () =>
   axiosInstance.get("/products/foods-and-drinks");
+
+//Order
+export const sendOrder = (userData) => axiosInstance.post("/orders", userData);

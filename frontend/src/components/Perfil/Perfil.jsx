@@ -18,7 +18,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 
@@ -53,23 +52,11 @@ const Perfil = () => {
     localStorage.setItem("perfilTabIndex", newValue);
   };
 
-  const goToPedidos = () => {
-    navigate("/pedidos-route");
-  };
-
-  const goToEditarPerfil = () => {
-    navigate("/editar-perfil-route");
-  };
-
-  const goToEstoque = () => {
-    navigate("/estoque-route");
-  };
-
   return (
     <Box sx={{ minHeight: "100vh", pb: 8 }}> 
       <Navbar />
       <Box sx={{ mt: 9}}>
-        <IconButton onClick={goToPedidos} color="inherit">
+        <IconButton onClick={() => navigate("/pedidos-route")} color="inherit">
           <ArrowBackIcon /><Typography sx={{textAlign: "left"}}>Voltar</Typography>
         </IconButton>
 
@@ -131,11 +118,11 @@ const Perfil = () => {
           allowScrollButtonsMobile
           aria-label="Navegação de Perfil"
         >
-          <Tab onClick={goToEditarPerfil} icon={<ManageAccountsIcon />} label="Editar Perfil" />
+          <Tab onClick={() => navigate("/editar-perfil-route")} icon={<ManageAccountsIcon />} label="Editar Perfil" />
           <Tab icon={<ReceiptLongIcon />} label="Gerar Extrato" />
-          <Tab onClick={goToEstoque} icon={<InventoryIcon />} label="Estoque" />
+          <Tab onClick={() => navigate("/estoque-route")} icon={<InventoryIcon />} label="Estoque" />
           <Tab icon={<EqualizerIcon />} label="Dashboard" />
-          <Tab icon={<PeopleAltIcon />} label="Usuários" />
+          <Tab onClick={() => navigate("/users-route")} icon={<PeopleAltIcon />} label="Usuários" />
         </Tabs>
       </Box>
     </Box>
