@@ -14,23 +14,33 @@ export const createNewProduct = async (req, res) => {
     const { nome, descricao, quantidade, valor, categoria } = req.body;
 
     if (!nome || !descricao || !quantidade || !valor || !categoria) {
-      return res.status(400).json({ error: "Todos os campos são obrigatórios." });
+      return res
+        .status(400)
+        .json({ error: "Todos os campos são obrigatórios." });
     }
 
     if (typeof nome !== "string" || typeof descricao !== "string") {
-      return res.status(400).json({ error: "Nome e descrição devem ser textos." });
+      return res
+        .status(400)
+        .json({ error: "Nome e descrição devem ser textos." });
     }
 
     if (!["bebidas", "comida"].includes(categoria)) {
-      return res.status(400).json({ error: "Categoria inválida. Use 'bebidas' ou 'comida'." });
+      return res
+        .status(400)
+        .json({ error: "Categoria inválida. Use 'bebidas' ou 'comida'." });
     }
 
     if (!Number.isInteger(quantidade) || quantidade < 0) {
-      return res.status(400).json({ error: "Quantidade deve ser um número inteiro positivo." });
+      return res
+        .status(400)
+        .json({ error: "Quantidade deve ser um número inteiro positivo." });
     }
 
     if (isNaN(valor) || valor <= 0) {
-      return res.status(400).json({ error: "Valor deve ser um número maior que zero." });
+      return res
+        .status(400)
+        .json({ error: "Valor deve ser um número maior que zero." });
     }
 
     const query = `
@@ -42,8 +52,9 @@ export const createNewProduct = async (req, res) => {
 
     const { rows } = await pool.query(query, values);
 
-    return res.status(201).json({ message: "Produto cadastrado com sucesso!", produto: rows[0] });
-
+    return res
+      .status(201)
+      .json({ message: "Produto cadastrado com sucesso!", produto: rows[0] });
   } catch (err) {
     console.error("Erro ao cadastrar produto:", err);
     return res.status(500).json({ error: "Erro interno do servidor." });
@@ -53,7 +64,7 @@ export const createNewProduct = async (req, res) => {
 export const foodsAndDrinks = async (_, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT nome, descricao, valor, categoria, quantidade
+      SELECT id AS id_product, nome, descricao, valor, categoria, quantidade
       FROM products
       WHERE categoria IN ('comida', 'bebidas')
     `);
@@ -68,4 +79,3 @@ export const foodsAndDrinks = async (_, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
-

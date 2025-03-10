@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../Navbar/Navbar";
 import { getFoodAndDrinks, sendOrder } from "../../axios";
-import { useNavigate } from "react-router-dom"; // Importe useNavigate para redirecionar o usuário
+import { useNavigate } from "react-router-dom";
 
 import {
   Box,
@@ -22,6 +22,9 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
@@ -33,11 +36,14 @@ export default function Pedidos() {
   const [value, setValue] = useState(0);
   const [products, setProducts] = useState({ comidas: [], bebidas: [] });
   const [selectedItems, setSelectedItems] = useState({});
-  const [openCard, setOpenCard] = React.useState(false);
-  const [openSuccessDialog, setOpenSuccessDialog] = React.useState(false); // Estado para o diálogo de sucesso
-  const navigate = useNavigate(); // Hook para navegação
+  const [openCard, setOpenCard] = useState(false);
+  const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  const id_user = 21; // Substitua isso pelo ID do usuário logado
+  const userIdJson = localStorage.getItem("user");
+  const id_user = userIdJson ? JSON.parse(userIdJson).id : null;
 
   useEffect(() => {
     getFoodAndDrinks()
@@ -83,30 +89,70 @@ export default function Pedidos() {
     setOpenCard(false);
   };
 
+  const closeWpp = () => {
+    setOpenSuccessDialog(false);
+    navigate("/pedidos-route");
+  };
+
   const handlePagar = async () => {
-    const items = Object.keys(selectedItems).map((name) => {
-      const product = [...products.comidas, ...products.bebidas].find(
-        (p) => p.nome === name
-      );
-      return {
-        id_product: product.id,
-        quantidade: selectedItems[name],
-        valor_unitario: parseFloat(product.valor),
-      };
-    });
+    if (!id_user) {
+      setError("Usuário não autenticado. Por favor, faça login.");
+      return;
+    }
+
+    setLoading(true);
+
+    // Mapeia os itens selecionados para o formato esperado pela API
+    const items = Object.keys(selectedItems)
+      .map((name) => {
+        const product = [...products.comidas, ...products.bebidas].find(
+          (p) => p.nome === name
+        );
+
+        if (!product) {
+          console.error(`Produto "${name}" não encontrado.`);
+          return null;
+        }
+
+        return {
+          id_product: product.id_product,
+          nome_produto: product.nome,
+          quantidade: selectedItems[name],
+          valor_unitario: parseFloat(product.valor),
+        };
+      })
+      .filter(Boolean); // Remove itens nulos (caso algum produto não seja encontrado)
+
+    console.log(products);
+
+    // 🔥 Mostra o corpo da requisição no console antes de enviá-la
+    const requestBody = {
+      id_user,
+      items,
+    };
+
+    console.log(
+      "🛒 Corpo da requisição a ser enviada:",
+      JSON.stringify(requestBody, null, 2)
+    );
 
     try {
-      const response = await sendOrder({
-        id_user,
-        items,
-      });
+      const response = await sendOrder(requestBody);
 
       if (response.status === 201) {
-        setOpenCard(false); // Fecha o diálogo de confirmação
-        setOpenSuccessDialog(true); // Abre o diálogo de sucesso
+        console.log("✅ Pedido criado com sucesso!", response.data);
+        setOpenCard(false);
+        setOpenSuccessDialog(true);
+        setSelectedItems({});
       }
     } catch (error) {
-      console.error("Erro ao enviar pedido:", error);
+      console.error(
+        "❌ Erro ao enviar pedido:",
+        error.response ? error.response.data : error.message
+      );
+      setError("Erro ao enviar pedido. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -207,9 +253,9 @@ export default function Pedidos() {
           onClick={handleCompraOk}
           variant="contained"
           color="primary"
-          disabled={calculateTotal() === "0.00"}
+          disabled={calculateTotal() === "0.00" || loading}
         >
-          CONFIRMAR COMPRA
+          {loading ? <CircularProgress size={24} /> : "CONFIRMAR COMPRA"}
         </Button>
 
         <Dialog
@@ -279,51 +325,48 @@ export default function Pedidos() {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handlePagar} variant="contained" color="primary">
-              Pagar
+            <Button onClick={handleClose} color="primary">
+              Cancelar
+            </Button>
+            <Button
+              onClick={handlePagar}
+              variant="contained"
+              color="primary"
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} /> : "Pagar"}
             </Button>
           </DialogActions>
         </Dialog>
 
         <Dialog
           open={openSuccessDialog}
-          onClose={() => setOpenSuccessDialog(false)}
+          onClose={closeWpp}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
           <DialogTitle id="alert-dialog-title">
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Confira seu WhatsApp
+              Confira seu WhatsApp <WhatsAppIcon />
             </Typography>
           </DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                }}
-              >
-                <WhatsAppIcon sx={{ color: "green", fontSize: 60, mb: 2 }} />
-                <Typography variant="body1">
-                  Confira seu WhatsApp para concluir o pagamento.
-                </Typography>
-              </Box>
-            </DialogContentText>
-          </DialogContent>
           <DialogActions>
-            <Button
-              onClick={() => navigate("/perfil-route")}
-              variant="contained"
-              color="primary"
-            >
+            <Button onClick={closeWpp} variant="contained" color="primary">
               Voltar
             </Button>
           </DialogActions>
         </Dialog>
       </Box>
+
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+      >
+        <Alert onClose={() => setError(null)} severity="error">
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
