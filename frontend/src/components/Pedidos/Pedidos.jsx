@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../Navbar/Navbar";
-import { getFoodAndDrinks } from "../../axios";
+import { getFoodAndDrinks, sendOrder } from "../../axios";
+import { useNavigate } from "react-router-dom"; // Importe useNavigate para redirecionar o usuário
 
 import {
   Box,
@@ -26,12 +27,17 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import LiquorIcon from "@mui/icons-material/Liquor";
 import LunchDiningIcon from "@mui/icons-material/LunchDining";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 
 export default function Pedidos() {
   const [value, setValue] = useState(0);
   const [products, setProducts] = useState({ comidas: [], bebidas: [] });
   const [selectedItems, setSelectedItems] = useState({});
   const [openCard, setOpenCard] = React.useState(false);
+  const [openSuccessDialog, setOpenSuccessDialog] = React.useState(false); // Estado para o diálogo de sucesso
+  const navigate = useNavigate(); // Hook para navegação
+
+  const id_user = 21; // Substitua isso pelo ID do usuário logado
 
   useEffect(() => {
     getFoodAndDrinks()
@@ -75,6 +81,33 @@ export default function Pedidos() {
 
   const handleClose = () => {
     setOpenCard(false);
+  };
+
+  const handlePagar = async () => {
+    const items = Object.keys(selectedItems).map((name) => {
+      const product = [...products.comidas, ...products.bebidas].find(
+        (p) => p.nome === name
+      );
+      return {
+        id_product: product.id,
+        quantidade: selectedItems[name],
+        valor_unitario: parseFloat(product.valor),
+      };
+    });
+
+    try {
+      const response = await sendOrder({
+        id_user,
+        items,
+      });
+
+      if (response.status === 201) {
+        setOpenCard(false); // Fecha o diálogo de confirmação
+        setOpenSuccessDialog(true); // Abre o diálogo de sucesso
+      }
+    } catch (error) {
+      console.error("Erro ao enviar pedido:", error);
+    }
   };
 
   const renderTable = (items) => (
@@ -178,6 +211,7 @@ export default function Pedidos() {
         >
           CONFIRMAR COMPRA
         </Button>
+
         <Dialog
           open={openCard}
           onClose={handleClose}
@@ -245,8 +279,47 @@ export default function Pedidos() {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} variant="contained" color="primary">
+            <Button onClick={handlePagar} variant="contained" color="primary">
               Pagar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog
+          open={openSuccessDialog}
+          onClose={() => setOpenSuccessDialog(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Confira seu WhatsApp
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                }}
+              >
+                <WhatsAppIcon sx={{ color: "green", fontSize: 60, mb: 2 }} />
+                <Typography variant="body1">
+                  Confira seu WhatsApp para concluir o pagamento.
+                </Typography>
+              </Box>
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => navigate("/perfil-route")}
+              variant="contained"
+              color="primary"
+            >
+              Voltar
             </Button>
           </DialogActions>
         </Dialog>

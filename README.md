@@ -4,10 +4,10 @@ Sistema de pedidos de uma cantina para uma associação espirita religiosa
 
 Para iniciar o repositorio AppCantina:
 
-cd AppCantina
+cd frontend
 npm run web
 
 Para iniciar o repositorio backend:
 
 cd backend
-npx nodemon server.js
+npm start

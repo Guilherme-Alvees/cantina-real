@@ -19,4 +19,5 @@ logs/
 # Build e arquivos gerados
 dist/
 build/
-.cache/
+.wwebjs_auth/
+.wwebjs_cache/
