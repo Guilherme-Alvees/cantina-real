@@ -6,7 +6,6 @@ import Pedidos from "./components/Pedidos/Pedidos";
 import Perfil from "./components/Perfil/Perfil";
 import EditarPerfil from "./components/Perfil/EditarPerfil";
 import Estoque from "./components/Produtos/Estoque";
-import CadastroProduto from "./components/Produtos/CadastroProduto";
 import Users from "./components/Users/Users";
 
 function App() {
@@ -19,7 +18,6 @@ function App() {
         <Route path="/perfil-route" element={<Perfil />} />
         <Route path="/editar-perfil-route" element={<EditarPerfil />} />
         <Route path="/estoque-route" element={<Estoque />} />
-        <Route path="/cadastro-produto-route" element={<CadastroProduto />} />
         <Route path="/users-route" element={<Users />} />
       </Routes>
     </BrowserRouter>

@@ -9,6 +9,8 @@ import {
   getAllProducts,
   createNewProduct,
   foodsAndDrinks,
+  deleteOneProduct,
+  editOneProduct,
 } from "../controllers/products.js";
 import { getLastThreeOrders, createOrder } from "../controllers/orders.js";
 
@@ -24,6 +26,8 @@ router.put("/:id", updateUser);
 router.get("/products", getAllProducts);
 router.get("/products/foods-and-drinks", foodsAndDrinks);
 router.post("/products", createNewProduct);
+router.delete("/products/:id", deleteOneProduct);
+router.put("/products/:id", editOneProduct);
 
 //oredrs.js
 router.get("/orders/last-three/:id_user", getLastThreeOrders);

@@ -42,5 +42,9 @@ export const getAllProducts = () => axiosInstance.get("/products");
 export const getFoodAndDrinks = () =>
   axiosInstance.get("/products/foods-and-drinks");
 
+export const deleteOneProduct = (id) => axiosInstance.delete(`/products/${id}`);
+
+export const editOneProduct = (id) => axiosInstance.put(`/products/${id}`);
+
 //Order
 export const sendOrder = (userData) => axiosInstance.post("/orders", userData);

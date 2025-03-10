@@ -1,5 +1,73 @@
 import pool from "../config/db.js";
 
+export const editOneProduct = async (req, res) => {
+  const { id } = req.params; // Obtém o ID do produto da URL
+  const { nome, descricao, quantidade, valor, categoria } = req.body; // Obtém os dados atualizados do corpo da requisição
+
+  try {
+    // Verifica se o produto existe
+    const produtoExistente = await pool.query(
+      "SELECT * FROM products WHERE id = $1",
+      [id]
+    );
+
+    if (produtoExistente.rows.length === 0) {
+      return res.status(404).json({ error: "Produto não encontrado." });
+    }
+
+    // Atualiza o produto
+    const query = `
+      UPDATE products
+      SET
+        nome = COALESCE($1, nome),
+        descricao = COALESCE($2, descricao),
+        quantidade = COALESCE($3, quantidade),
+        valor = COALESCE($4, valor),
+        categoria = COALESCE($5, categoria)
+      WHERE id = $6
+      RETURNING *;
+    `;
+
+    const values = [nome, descricao, quantidade, valor, categoria, id];
+
+    const resultado = await pool.query(query, values);
+
+    // Retorna o produto atualizado
+    res.status(200).json({
+      message: "Produto atualizado com sucesso.",
+      produto: resultado.rows[0],
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar produto:", error);
+    res.status(500).json({ error: "Erro ao atualizar produto." });
+  }
+};
+
+export const deleteOneProduct = async (req, res) => {
+  const { id } = req.params; // Obtém o ID do produto da URL
+
+  try {
+    // Verifica se o produto existe
+    const produtoExistente = await pool.query(
+      "SELECT * FROM products WHERE id = $1",
+      [id]
+    );
+
+    if (produtoExistente.rows.length === 0) {
+      return res.status(404).json({ error: "Produto não encontrado." });
+    }
+
+    // Deleta o produto
+    await pool.query("DELETE FROM products WHERE id = $1", [id]);
+
+    // Retorna uma mensagem de sucesso
+    res.status(200).json({ message: "Produto deletado com sucesso." });
+  } catch (error) {
+    console.error("Erro ao deletar produto:", error);
+    res.status(500).json({ error: "Erro ao deletar produto." });
+  }
+};
+
 export const getAllProducts = async (_, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM products");
