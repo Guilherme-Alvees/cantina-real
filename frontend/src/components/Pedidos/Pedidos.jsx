@@ -208,7 +208,7 @@ export default function Pedidos() {
   return (
     <Box sx={{ width: "100%" }}>
       <Navbar />
-      <Box sx={{ borderBottom: 1, borderColor: "divider", mt: 7 }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mt: 8 }}>
         <Tabs
           value={value}
           onChange={handleChange}
@@ -228,14 +228,16 @@ export default function Pedidos() {
           color: "green",
           display: "flex",
           justifyContent: "space-between",
-          pl: 4,
-          pr: 4,
+          border: "solid 1px green",
+          borderRadius: "5px",
+          m: 2,
+          p: 1,
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+        <Typography variant="h6" sx={{ color: "green", fontWeight: "bold" }}>
           Total:
         </Typography>
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+        <Typography variant="h6" sx={{ color: "green", fontWeight: "bold" }}>
           R$ {calculateTotal()}
         </Typography>
       </Box>
@@ -313,12 +315,25 @@ export default function Pedidos() {
                 </Table>
               </TableContainer>
               <Box
-                sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  mt: 2,
+                  border: "solid 1px green",
+                  p: 1,
+                  borderRadius: "5px",
+                }}
               >
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ color: "green", fontWeight: "bold" }}
+                >
                   Total:
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ color: "green", fontWeight: "bold" }}
+                >
                   R$ {calculateTotal()}
                 </Typography>
               </Box>
@@ -344,14 +359,87 @@ export default function Pedidos() {
           onClose={closeWpp}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
+          sx={{
+            borderRadius: 3, // Bordas arredondadas
+            boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)", // Sombra suave
+          }}
         >
+          {/* Título */}
           <DialogTitle id="alert-dialog-title">
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Confira seu WhatsApp <WhatsAppIcon />
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: "bold",
+                textAlign: "center",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1, // Espaçamento entre o texto e o ícone
+              }}
+            >
+              Confira seu WhatsApp
+              <WhatsAppIcon sx={{ color: "#25D366", fontSize: 32 }} />{" "}
             </Typography>
           </DialogTitle>
-          <DialogActions>
-            <Button onClick={closeWpp} variant="contained" color="primary">
+
+          {/* Conteúdo */}
+          <DialogContent>
+            <Typography
+              variant="body1"
+              sx={{ textAlign: "center", color: "text.secondary" }}
+            >
+              Seu pedido foi confirmado com sucesso! Em instantes, você receberá
+              uma mensagem no WhatsApp com os detalhes.
+            </Typography>
+          </DialogContent>
+
+          {/* Ações (Imagem e Botão) */}
+          <DialogActions
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2, // Espaçamento entre a imagem e o botão
+              padding: 3, // Espaçamento interno
+            }}
+          >
+            {/* Imagem */}
+            <Box
+              sx={{
+                width: 120, // Largura da imagem
+                height: 120, // Altura da imagem
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <img
+                src="/img-check.png"
+                alt="Ícone de confirmação"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                }}
+              />
+            </Box>
+
+            {/* Botão */}
+            <Button
+              onClick={closeWpp}
+              variant="contained"
+              color="primary"
+              sx={{
+                backgroundColor: "#1976D2", // Cor do botão
+                "&:hover": {
+                  backgroundColor: "#1565C0", // Cor do botão ao passar o mouse
+                },
+                padding: "10px 24px", // Espaçamento interno
+                fontSize: "1rem", // Tamanho da fonte
+                fontWeight: "bold", // Texto em negrito
+                textTransform: "none", // Remove a transformação de texto para maiúsculas
+              }}
+            >
               Voltar
             </Button>
           </DialogActions>

@@ -16,6 +16,7 @@ import {
   Button,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Navbar from "../Navbar/Navbar";
 
 const Users = () => {
@@ -45,7 +46,10 @@ const Users = () => {
 
     setModifiedUsers((prev) => ({
       ...prev,
-      [id]: !prev[id] !== undefined ? !prev[id] : !users.find((u) => u.id === id).adm_user,
+      [id]:
+        !prev[id] !== undefined
+          ? !prev[id]
+          : !users.find((u) => u.id === id).adm_user,
     }));
   };
 
@@ -117,6 +121,20 @@ const Users = () => {
       >
         Salvar Alterações
       </Button>
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: 16,
+          right: 16,
+          padding: 2,
+        }}
+      >
+        <IconButton onClick={() => navigate("/cadastro-route")} color="primary">
+          <AddCircleIcon
+            sx={{ fontSize: "5rem", bgcolor: "white", borderRadius: "50%" }}
+          />
+        </IconButton>
+      </Box>
     </Box>
   );
 };

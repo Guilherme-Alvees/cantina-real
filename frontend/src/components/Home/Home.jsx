@@ -9,30 +9,25 @@ import {
   IconButton,
   FormControl,
   InputLabel,
-  FilledInput,
+  OutlinedInput,
   InputAdornment,
   Alert,
+  Typography,
+  Backdrop,
+  CircularProgress,
+  Snackbar,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import Backdrop from "@mui/material/Backdrop";
-import CircularProgress from "@mui/material/CircularProgress";
 
-function Home() {
+function Login() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [openBackdrop, setOpenBackdrop] = React.useState(false);
-
-  const closeBackdrop = () => {
-    setOpenBackdrop(false);
-  };
-
-  const handleClick = () => {
-    navigate("/cadastro-route");
-  };
+  const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleClickShowPassword = () => {
     setShowPassword((prev) => !prev);
@@ -43,139 +38,179 @@ function Home() {
   };
 
   const handleLogin = async () => {
-    setErrorMessage(""); 
-    setOpenBackdrop(true);
-  
-    setTimeout(() => {
-      setOpenBackdrop(false);
-    }, 2000);
-  
+    setErrorMessage("");
+    setLoading(true);
+
     if (!email || !senha) {
       setErrorMessage("Por favor, preencha todos os campos!");
+      setLoading(false);
       return;
     }
-  
+
     try {
-      const response = await loginUser({ email, senha }); 
+      const response = await loginUser({ email, senha });
       console.log("Login bem-sucedido:", response.data);
-  
-      // Verifica se os dados do usuário existem antes de salvar
+
       if (response.data && response.data.user) {
         localStorage.setItem("user", JSON.stringify(response.data.user));
+        setSuccessMessage("Login realizado com sucesso!");
+        setTimeout(() => {
+          navigate("/pedidos-route");
+        }, 1000);
       }
-  
-      navigate("/pedidos-route"); 
     } catch (error) {
       console.error("Erro ao fazer login:", error);
-  
+
       if (error.response) {
         setErrorMessage(error.response.data.error || "Erro ao fazer login!");
       } else {
         setErrorMessage("Erro de conexão com o servidor!");
       }
+    } finally {
+      setLoading(false);
     }
-  };    
+  };
 
   return (
     <Box
       sx={{
+        maxHeight: "100vh",
+        display: "flex",
         flexDirection: "column",
-        alignItems: "center",
         justifyContent: "center",
-        height: "100vh",
-        position: "fixed",
-        padding: 3
+        alignItems: "center",
+        bgcolor: "background.default",
+        p: 2,
       }}
     >
       {/* Logo */}
-      <Box sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}>
-      <img src="/logo-cantina-real.png" alt="Logo Cantina Real" width={200} />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          mb: 4,
+        }}
+      >
+        <img src="/logo-cantina-real.png" alt="Logo Cantina Real" width={200} />
       </Box>
 
-      {/* Exibir erro, se houver */}
+      {/* Título */}
+      <Typography
+        variant="h5"
+        sx={{ fontWeight: "bold", textAlign: "center", color: "green", mb: 2 }}
+      >
+        Login de Usuário
+      </Typography>
+
+      {/* Formulário */}
+      <Box
+        component="form"
+        sx={{
+          width: "100%",
+          maxWidth: 400,
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        {/* Campo de Email */}
+        <TextField
+          fullWidth
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
+        {/* Campo de Senha */}
+        <FormControl fullWidth variant="outlined">
+          <InputLabel htmlFor="outlined-adornment-password">Senha</InputLabel>
+          <OutlinedInput
+            id="outlined-adornment-password"
+            type={showPassword ? "text" : "password"}
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+            label="Senha"
+          />
+        </FormControl>
+
+        {/* Botão de Entrar */}
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={handleLogin}
+          sx={{ mt: 2, fontWeight: "bold" }}
+          disabled={loading}
+        >
+          {loading ? <CircularProgress size={24} /> : "Entrar"}
+        </Button>
+
+        {/* Botão de Cadastrar */}
+        <Button
+          fullWidth
+          variant="outlined"
+          onClick={() => navigate("/cadastro-route")}
+          sx={{ mt: 1, fontWeight: "bold" }}
+        >
+          Cadastrar
+        </Button>
+
+        {/* Botão de Esqueci a Senha (Opcional) */}
+        <Button
+          fullWidth
+          variant="text"
+          onClick={() => navigate("/recuperar-senha-route")} // Adicione a rota correta
+          sx={{ mt: 1, fontWeight: "bold" }}
+        >
+          Esqueci a senha
+        </Button>
+      </Box>
+
+      {/* Mensagens de Erro e Sucesso */}
       {errorMessage && (
-        <Alert severity="error" sx={{ mt: 2, width: "100%" }}>
+        <Alert severity="error" sx={{ width: "100%", maxWidth: 400, mt: 2 }}>
           {errorMessage}
         </Alert>
       )}
+      {successMessage && (
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={3000}
+          onClose={() => setSuccessMessage("")}
+        >
+          <Alert
+            onClose={() => setSuccessMessage("")}
+            severity="success"
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {successMessage}
+          </Alert>
+        </Snackbar>
+      )}
 
-      {/* Campo de Email */}
-      <TextField
-        label="Email"
-        variant="filled"
-        fullWidth
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        sx={{ borderRadius: 1, mt: 2 }}
-      />
-
-      {/* Campo de Senha */}
-      <FormControl fullWidth variant="filled" sx={{ mt: 2 }}>
-        <InputLabel htmlFor="filled-adornment-password">Senha</InputLabel>
-        <FilledInput
-          id="filled-adornment-password"
-          type={showPassword ? "text" : "password"}
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                onClick={handleClickShowPassword}
-                onMouseDown={handleMouseDownPassword}
-                edge="end"
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          }
-        />
-      </FormControl>
-
-      {/* Botão Entrar */}
-      <Button
-        onClick={handleLogin}
-        fullWidth
-        variant="contained"
-        sx={{
-          backgroundColor: "#00bf63",
-          mt: 2,
-          borderRadius: 3,
-          marginTop: "5rem",
-          fontWeight: "bold",
-          padding: "0.5rem",
-        }}
-      >
-        ENTRAR
-      </Button>
+      {/* Backdrop de Carregamento */}
       <Backdrop
-        sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
-        open={openBackdrop}
-        onClick={closeBackdrop}
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-
-      {/* Botão CADASTRAR */}
-      <Button
-        onClick={handleClick}
-        fullWidth
-        variant="contained"
-        sx={{
-          backgroundColor: "#7ed957",
-          mt: 2,
-          borderRadius: 3,
-          fontWeight: "bold",
-          padding: "0.5rem",
-        }}
-      >
-        CADASTRAR
-      </Button>
     </Box>
   );
 }
 
-export default Home;
+export default Login;

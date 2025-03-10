@@ -68,7 +68,7 @@ const EditarPerfil = () => {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh",}}>
+    <Box sx={{ maxHeight: "100vh" }}>
       <Navbar />
       <Box sx={{ mt: 9, alignItems: "center" }}>
         <IconButton onClick={() => navigate("/perfil-route")} color="inherit">
@@ -76,10 +76,16 @@ const EditarPerfil = () => {
           <Typography sx={{ textAlign: "left" }}>Voltar</Typography>
         </IconButton>
       </Box>
-      <Typography sx={{ fontWeight: "bold", textAlign: "center", color: "green" }}>
+      <Typography
+        sx={{ fontWeight: "bold", textAlign: "center", color: "green" }}
+      >
         Editar Perfil
       </Typography>
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 2, p: 2 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 2, p: 2 }}
+      >
         <TextField
           fullWidth
           label="Nome"
@@ -127,7 +133,12 @@ const EditarPerfil = () => {
             label="Senha"
           />
         </FormControl>
-        <Button type="submit" fullWidth variant="contained" sx={{ mt: 2, fontWeight: "bold" }}>
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          sx={{ mt: 2, fontWeight: "bold" }}
+        >
           Salvar Alterações
         </Button>
       </Box>
@@ -138,13 +149,24 @@ const EditarPerfil = () => {
         </Alert>
       )}
 
-      <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
         <CircularProgress color="inherit" />
       </Backdrop>
 
-      <Snackbar open={!!successMessage} autoHideDuration={5000} onClose={() => setSuccessMessage("")}
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={5000}
+        onClose={() => setSuccessMessage("")}
       >
-        <Alert onClose={() => setSuccessMessage("")} severity="success" variant="filled" sx={{ width: "100%" }}>
+        <Alert
+          onClose={() => setSuccessMessage("")}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
           {successMessage}
         </Alert>
       </Snackbar>

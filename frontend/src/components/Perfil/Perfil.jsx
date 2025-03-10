@@ -31,6 +31,7 @@ const Perfil = () => {
   const navigate = useNavigate();
   const userIdJson = localStorage.getItem("user");
   const userId = userIdJson ? JSON.parse(userIdJson).id : null;
+  const isAdm = userIdJson ? JSON.parse(userIdJson).adm_user : null;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,11 +54,12 @@ const Perfil = () => {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", pb: 8 }}> 
+    <Box sx={{ minHeight: "100vh", pb: 8 }}>
       <Navbar />
-      <Box sx={{ mt: 9}}>
+      <Box sx={{ mt: 9 }}>
         <IconButton onClick={() => navigate("/pedidos-route")} color="inherit">
-          <ArrowBackIcon /><Typography sx={{textAlign: "left"}}>Voltar</Typography>
+          <ArrowBackIcon />
+          <Typography sx={{ textAlign: "left" }}>Voltar</Typography>
         </IconButton>
 
         {loading && (
@@ -65,25 +67,29 @@ const Perfil = () => {
             <CircularProgress />
           </Box>
         )}
-          
-          <Box sx={{ p: 1 }}>
-  {!loading && pedidoData.length > 0 && (
-    <>
-      <Typography
-        sx={{
-          fontWeight: "bold",
-          textAlign: "center",
-          color: "green"
-        }}
-      >
-        Histórico de Pedidos
-      </Typography>
-      {pedidoData.map((pedido, index) => (
-        <Historico key={index} dataPedido={pedido.dataPedido} pedidos={pedido.pedidos} />
-      ))}
-    </>
-  )}
-</Box>
+
+        <Box sx={{ p: 1 }}>
+          {!loading && pedidoData.length > 0 && (
+            <>
+              <Typography
+                sx={{
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  color: "green",
+                }}
+              >
+                Histórico de Pedidos
+              </Typography>
+              {pedidoData.map((pedido, index) => (
+                <Historico
+                  key={index}
+                  dataPedido={pedido.dataPedido}
+                  pedidos={pedido.pedidos}
+                />
+              ))}
+            </>
+          )}
+        </Box>
 
         {!loading && pedidoData.length === 0 && (
           <Card sx={{ minWidth: 275, mt: 5, textAlign: "center", p: 2 }}>
@@ -93,8 +99,7 @@ const Perfil = () => {
                 Você ainda não tem nenhum pedido em nossa cantina.
               </Typography>
             </CardContent>
-            <CardActions sx={{ justifyContent: "center" }}>
-            </CardActions>
+            <CardActions sx={{ justifyContent: "center" }}></CardActions>
           </Card>
         )}
       </Box>
@@ -117,12 +122,39 @@ const Perfil = () => {
           scrollButtons="auto"
           allowScrollButtonsMobile
           aria-label="Navegação de Perfil"
+          sx={{
+            justifyContent: isAdm ? "flex-start" : "center", // Centraliza se não for admin
+            "& .MuiTabs-scroller": {
+              display: "flex",
+              justifyContent: "center", // Centraliza os botões dentro do scroller
+            },
+          }}
         >
-          <Tab onClick={() => navigate("/editar-perfil-route")} icon={<ManageAccountsIcon />} label="Editar Perfil" />
-          <Tab icon={<ReceiptLongIcon />} label="Gerar Extrato" />
-          <Tab onClick={() => navigate("/estoque-route")} icon={<InventoryIcon />} label="Estoque" />
-          <Tab icon={<EqualizerIcon />} label="Dashboard" />
-          <Tab onClick={() => navigate("/users-route")} icon={<PeopleAltIcon />} label="Usuários" />
+          <Tab
+            onClick={() => navigate("/editar-perfil-route")}
+            icon={<ManageAccountsIcon />}
+            label="Editar Perfil"
+          />
+          <Tab icon={<ReceiptLongIcon />} label="Gerar Extrato" disabled />
+          {isAdm && (
+            <>
+              <Tab
+                onClick={() => navigate("/estoque-route")}
+                icon={<InventoryIcon />}
+                label="Estoque"
+              />
+              <Tab
+                onClick={() => navigate("/dashboard-route")}
+                icon={<EqualizerIcon />}
+                label="Dashboard"
+              />
+              <Tab
+                onClick={() => navigate("/users-route")}
+                icon={<PeopleAltIcon />}
+                label="Usuários"
+              />
+            </>
+          )}
         </Tabs>
       </Box>
     </Box>
