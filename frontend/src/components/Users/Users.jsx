@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axiosInstance, { getAllUsers } from "../../axios";
+import { getAllUsers, admStatus } from "../../axios";
 import {
   Box,
   Typography,
@@ -14,6 +14,7 @@ import {
   Switch,
   IconButton,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -22,7 +23,8 @@ import Navbar from "../Navbar/Navbar";
 const Users = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
-  const [modifiedUsers, setModifiedUsers] = useState({}); // Estado para mudanças pendentes
+  const [modifiedUsers, setModifiedUsers] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -31,7 +33,8 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       const response = await getAllUsers();
-      setUsers(response.data);
+      const sortedUsers = response.data.sort((a, b) => b.adm_user - a.adm_user); // Admins primeiro
+      setUsers(sortedUsers);
     } catch (error) {
       console.error("Erro ao buscar usuários:", error);
     }
@@ -44,26 +47,41 @@ const Users = () => {
       )
     );
 
-    setModifiedUsers((prev) => ({
-      ...prev,
-      [id]:
-        !prev[id] !== undefined
-          ? !prev[id]
-          : !users.find((u) => u.id === id).adm_user,
+    setModifiedUsers((prevModifiedUsers) => ({
+      ...prevModifiedUsers,
+      [id]: !users.find((user) => user.id === id).adm_user, // Inverte o status do usuário no estado de alterações
     }));
   };
 
   const handleSaveChanges = async () => {
+    setLoading(true);
     try {
       const updates = Object.entries(modifiedUsers).map(([id, adm_user]) =>
-        axiosInstance.put(`/users/${id}/admin`, { adm_user })
+        admStatus(id, adm_user).then((response) => ({
+          id,
+          user: response.data.user,
+        }))
       );
 
-      await Promise.all(updates);
+      // Aguarda todas as atualizações do status serem salvas
+      const updatedUsers = await Promise.all(updates);
+
+      // Atualiza a lista de usuários após salvar as alterações
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => {
+          const updatedUser = updatedUsers.find((u) => u.id === user.id);
+          return updatedUser
+            ? { ...user, adm_user: updatedUser.user.adm_user }
+            : user;
+        })
+      );
+
+      // Limpa as alterações
       setModifiedUsers({});
-      fetchUsers();
     } catch (error) {
       console.error("Erro ao salvar alterações:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,7 +114,7 @@ const Users = () => {
                   <TableCell align="center">
                     <Switch
                       checked={user.adm_user}
-                      onChange={() => handleToggleAdmin(user.id)}
+                      onChange={() => handleToggleAdmin(user.id)} // Altera o status de admin
                       color="primary"
                     />
                   </TableCell>
@@ -110,17 +128,22 @@ const Users = () => {
       <Button
         variant="contained"
         color="success"
-        disabled={Object.keys(modifiedUsers).length === 0}
+        disabled={Object.keys(modifiedUsers).length === 0 || loading}
         onClick={handleSaveChanges}
         sx={{
           position: "fixed",
-          bottom: 16,
+          bottom: 10,
           left: "50%",
           transform: "translateX(-50%)",
         }}
       >
-        Salvar Alterações
+        {loading ? (
+          <CircularProgress size={24} sx={{ color: "white" }} />
+        ) : (
+          "Salvar Alterações"
+        )}
       </Button>
+
       <Box
         sx={{
           position: "fixed",
@@ -131,7 +154,7 @@ const Users = () => {
       >
         <IconButton onClick={() => navigate("/cadastro-route")} color="primary">
           <AddCircleIcon
-            sx={{ fontSize: "5rem", bgcolor: "white", borderRadius: "50%" }}
+            sx={{ fontSize: "4rem", bgcolor: "white", borderRadius: "50%" }}
           />
         </IconButton>
       </Box>

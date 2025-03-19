@@ -102,7 +102,6 @@ export default function Pedidos() {
 
     setLoading(true);
 
-    // Mapeia os itens selecionados para o formato esperado pela API
     const items = Object.keys(selectedItems)
       .map((name) => {
         const product = [...products.comidas, ...products.bebidas].find(
@@ -121,11 +120,10 @@ export default function Pedidos() {
           valor_unitario: parseFloat(product.valor),
         };
       })
-      .filter(Boolean); // Remove itens nulos (caso algum produto não seja encontrado)
+      .filter(Boolean);
 
     console.log(products);
 
-    // 🔥 Mostra o corpo da requisição no console antes de enviá-la
     const requestBody = {
       id_user,
       items,

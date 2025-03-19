@@ -19,6 +19,9 @@ axiosInstance.interceptors.response.use(
 export default axiosInstance;
 
 //Users
+export const admStatus = (id, adm_user) =>
+  axiosInstance.put(`/users/${id}/admin`, { adm_user });
+
 export const getAllUsers = () => axiosInstance.get("/users");
 
 export const registerUser = (userData) =>

@@ -23,7 +23,7 @@ import FastfoodIcon from "@mui/icons-material/Fastfood";
 
 const Perfil = () => {
   const [pedidoData, setPedidoData] = useState([]);
-  const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
+  const [loading, setLoading] = useState(true);
   const [value, setValue] = React.useState(() => {
     return parseInt(localStorage.getItem("perfilTabIndex")) || 0;
   });
@@ -41,12 +41,12 @@ const Perfil = () => {
       } catch (error) {
         console.error("Erro ao carregar os pedidos:", error);
       } finally {
-        setLoading(false); // Quando termina a requisição, tira o loading
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [userId]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -104,7 +104,6 @@ const Perfil = () => {
         )}
       </Box>
 
-      {/* Barra de navegação fixa no final da tela */}
       <Box
         sx={{
           position: "fixed",
@@ -113,45 +112,59 @@ const Perfil = () => {
           width: "100vw",
           bgcolor: "background.paper",
           boxShadow: "0px -2px 5px rgba(0,0,0,0.1)",
+          zIndex: 1000,
         }}
       >
         <Tabs
           value={value}
           onChange={handleChange}
-          variant="scrollable"
-          scrollButtons="auto"
-          allowScrollButtonsMobile
           aria-label="Navegação de Perfil"
           sx={{
-            justifyContent: isAdm ? "flex-start" : "center", // Centraliza se não for admin
+            display: "flex",
+            justifyContent: "center",
+            overflow: "hidden",
             "& .MuiTabs-scroller": {
               display: "flex",
-              justifyContent: "center", // Centraliza os botões dentro do scroller
+              justifyContent: "center",
             },
+            padding: "0 10px",
           }}
         >
           <Tab
             onClick={() => navigate("/editar-perfil-route")}
-            icon={<ManageAccountsIcon />}
+            icon={<ManageAccountsIcon sx={{ fontSize: 30 }} />}
             label="Editar Perfil"
+            sx={{ minWidth: "auto", padding: "6px", textTransform: "none" }}
           />
-          <Tab icon={<ReceiptLongIcon />} label="Gerar Extrato" disabled />
           {isAdm && (
             <>
               <Tab
                 onClick={() => navigate("/estoque-route")}
-                icon={<InventoryIcon />}
+                icon={<InventoryIcon sx={{ fontSize: 30 }} />}
                 label="Estoque"
+                sx={{
+                  minWidth: "auto",
+                  padding: "6px",
+                  textTransform: "none",
+                  mx: 2,
+                }}
               />
               <Tab
                 onClick={() => navigate("/dashboard-route")}
-                icon={<EqualizerIcon />}
+                icon={<EqualizerIcon sx={{ fontSize: 30 }} />}
                 label="Dashboard"
+                sx={{
+                  minWidth: "auto",
+                  padding: "6px",
+                  textTransform: "none",
+                  mx: 2,
+                }}
               />
               <Tab
                 onClick={() => navigate("/users-route")}
-                icon={<PeopleAltIcon />}
+                icon={<PeopleAltIcon sx={{ fontSize: 30 }} />}
                 label="Usuários"
+                sx={{ minWidth: "auto", padding: "6px", textTransform: "none" }}
               />
             </>
           )}
