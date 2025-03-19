@@ -46,7 +46,7 @@ const Estoque = () => {
   const [formData, setFormData] = useState({
     nome: "",
     descricao: "",
-    quantidade: "", // Inicializado como string vazia
+    quantidade: "",
     valor: "",
     categoria: "",
   });
@@ -75,8 +75,8 @@ const Estoque = () => {
       setFormData({
         nome: product.nome,
         descricao: product.descricao,
-        quantidade: product.quantidade.toString(), // Convertido para string
-        valor: (product.valor * 100).toString(), // Converte para centavos
+        quantidade: product.quantidade.toString(),
+        valor: (product.valor * 100).toString(),
         categoria: product.categoria,
       });
       setSelectedProduct(product);
@@ -85,8 +85,8 @@ const Estoque = () => {
       setFormData({
         nome: "",
         descricao: "",
-        quantidade: "", // String vazia
-        valor: "", // String vazia
+        quantidade: "",
+        valor: "",
         categoria: "",
       });
       setIsEditing(false);
@@ -129,7 +129,7 @@ const Estoque = () => {
   };
 
   const handleValorChange = (e) => {
-    const valor = e.target.value.replace(/\D/g, ""); // Remove tudo que não for número
+    const valor = e.target.value.replace(/\D/g, "");
     setFormData({ ...formData, valor });
   };
 
@@ -141,7 +141,7 @@ const Estoque = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Ativa o estado de carregamento
+    setLoading(true);
 
     const valorFormatado = formData.valor
       ? (parseFloat(formData.valor) / 100).toFixed(2)
@@ -159,12 +159,19 @@ const Estoque = () => {
     try {
       if (isEditing) {
         await editOneProduct(selectedProduct.id, productData);
+
+        // Atualiza diretamente o produto no estado
+        setProducts((prevProducts) =>
+          prevProducts.map((prod) =>
+            prod.id === selectedProduct.id ? { ...prod, ...productData } : prod
+          )
+        );
+
         setSnackbarMessage("Produto atualizado com sucesso");
       } else {
         await registerNewProduct(productData);
         setSnackbarMessage("Produto cadastrado com sucesso");
       }
-      fetchProducts();
       setOpenDialog(false);
     } catch (error) {
       console.error("Erro ao salvar produto:", error);
@@ -295,9 +302,9 @@ const Estoque = () => {
               name="quantidade"
               type="number"
               value={formData.quantidade}
-              onChange={handleFormChange} // Adicionado aqui
+              onChange={handleFormChange}
               required
-              inputProps={{ min: 0 }} // Garante que o valor seja positivo
+              inputProps={{ min: 0 }}
             />
             <FormControl fullWidth sx={{ mt: 1 }}>
               <InputLabel>Categoria</InputLabel>
