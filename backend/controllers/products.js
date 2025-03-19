@@ -1,10 +1,14 @@
 import pool from "../config/db.js";
 
 export const editOneProduct = async (req, res) => {
-  const { id } = req.params; // Obtém o ID do produto da URL
-  const { nome, descricao, quantidade, valor, categoria } = req.body; // Obtém os dados atualizados do corpo da requisição
+  const { id } = req.params;
+  let { nome, descricao, quantidade, valor, categoria } = req.body;
 
   try {
+    // Se algum campo não for enviado, definimos como null (para evitar erro de tipo)
+    quantidade = quantidade !== undefined ? Number(quantidade) : null;
+    valor = valor !== undefined ? Number(valor) : null;
+
     // Verifica se o produto existe
     const produtoExistente = await pool.query(
       "SELECT * FROM products WHERE id = $1",
@@ -15,24 +19,30 @@ export const editOneProduct = async (req, res) => {
       return res.status(404).json({ error: "Produto não encontrado." });
     }
 
-    // Atualiza o produto
+    // Query corrigida: agora passamos valores com tipos bem definidos
     const query = `
       UPDATE products
       SET
         nome = COALESCE($1, nome),
         descricao = COALESCE($2, descricao),
-        quantidade = COALESCE($3, quantidade),
-        valor = COALESCE($4, valor),
+        quantidade = COALESCE($3::integer, quantidade),
+        valor = COALESCE($4::numeric, valor),
         categoria = COALESCE($5, categoria)
       WHERE id = $6
       RETURNING *;
     `;
 
-    const values = [nome, descricao, quantidade, valor, categoria, id];
+    const values = [
+      nome || null,
+      descricao || null,
+      quantidade,
+      valor,
+      categoria || null,
+      id,
+    ];
 
     const resultado = await pool.query(query, values);
 
-    // Retorna o produto atualizado
     res.status(200).json({
       message: "Produto atualizado com sucesso.",
       produto: resultado.rows[0],
