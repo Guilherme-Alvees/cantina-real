@@ -4,6 +4,7 @@ import {
   postNewUser,
   loginUser,
   updateUser,
+  updateAdminStatus,
 } from "../controllers/users.js";
 import {
   getAllProducts,
@@ -21,6 +22,7 @@ router.get("/users", getAllUsers);
 router.post("/users", postNewUser);
 router.post("/login", loginUser);
 router.put("/:id", updateUser);
+router.put("/users/:id/admin", updateAdminStatus);
 
 //products.js
 router.get("/products", getAllProducts);

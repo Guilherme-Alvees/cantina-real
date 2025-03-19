@@ -1,5 +1,35 @@
 import pool from "../config/db.js";
 
+export const updateAdminStatus = async (req, res) => {
+  const { id } = req.params;
+  const { adm_user } = req.body;
+
+  if (typeof adm_user !== "boolean") {
+    return res.status(400).json({
+      error: "O campo adm_user deve ser um booleano (true ou false).",
+    });
+  }
+
+  try {
+    const result = await pool.query(
+      "UPDATE users SET adm_user = $1 WHERE id = $2 RETURNING *",
+      [adm_user, id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    res.status(200).json({
+      message: "Status de administrador atualizado com sucesso.",
+      user: result.rows[0], // Retorna o usuário atualizado
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar status de administrador:", error);
+    res.status(500).json({ error: "Erro interno do servidor." });
+  }
+};
+
 export const getAllUsers = async (_, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM users");
@@ -72,10 +102,14 @@ export const updateUser = async (req, res) => {
   }
 
   try {
-    const userExists = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+    const userExists = await pool.query("SELECT * FROM users WHERE id = $1", [
+      id,
+    ]);
 
     if (userExists.rows.length === 0) {
-      return res.status(404).json({ error: `Usuário com ID ${id} não encontrado!` });
+      return res
+        .status(404)
+        .json({ error: `Usuário com ID ${id} não encontrado!` });
     }
 
     const query = `
@@ -83,13 +117,17 @@ export const updateUser = async (req, res) => {
       SET nome = $1, email = $2, telefone = $3, senha = $4
       WHERE id = $5
       RETURNING *`;
-    
+
     const values = [nome, email, telefone, senha, id];
     const { rows } = await pool.query(query, values);
 
-    return res.status(200).json({ message: "Usuário atualizado com sucesso!", user: rows[0] });
+    return res
+      .status(200)
+      .json({ message: "Usuário atualizado com sucesso!", user: rows[0] });
   } catch (err) {
     console.error("Erro ao atualizar usuário:", err);
-    return res.status(500).json({ error: "Erro interno no servidor. Tente novamente mais tarde." });
+    return res
+      .status(500)
+      .json({ error: "Erro interno no servidor. Tente novamente mais tarde." });
   }
 };

@@ -90,7 +90,7 @@ export const createOrder = async (req, res) => {
     await client.query("BEGIN"); // Inicia uma transação
 
     // Obtém a data atual no formato DD/MM/YYYY
-    const dataPedido = new Date().toLocaleDateString("pt-BR");
+    const dataPedido = new Date().toISOString().split("T")[0]; // Retorna no formato YYYY-MM-DD
 
     // Insere o pedido na tabela 'orders'
     const orderQuery =
